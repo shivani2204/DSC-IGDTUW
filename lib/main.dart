@@ -1,118 +1,192 @@
 import 'dart:ui';
-import 'package:flutter/material.dart';
-import 'package:font_awesome_flutter/font_awesome_flutter.dart';
-import 'package:url_launcher/url_launcher.dart';
-
-
-void main() {
-  runApp(MyApp());
+import "package:flutter/material.dart";
+import 'package:math_expressions/math_expressions.dart';
+void main(){
+  runApp(Calculator());
 }
-
-class MyApp extends StatelessWidget {
+class Calculator extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Flutter Demo',
-      home: MyHomePage(),
+      debugShowCheckedModeBanner: false,
+      title: 'Calculator',
+      theme: ThemeData(primarySwatch: Colors.purple),
+      home: SimpleCalculator(),
     );
   }
 }
 
-class MyHomePage extends StatelessWidget {
+class SimpleCalculator extends StatefulWidget {
+  @override
+  _SimpleCalculatorState createState() => _SimpleCalculatorState();
+}
+
+class _SimpleCalculatorState extends State<SimpleCalculator> { 
+  String equation = '0';
+  String result = '0';
+  String expression = "";
+  double equationfontsize = 38.0;
+  double resultfontsize = 48.0;
+  
+  buttonpressed(String buttontext){
+    setState(() {
+      if(buttontext == "C"){
+        equation = "0";
+        result = "0";
+        equationfontsize = 38.0;
+        resultfontsize = 48.0;
+      }
+      else if(buttontext == "⌫"){
+        equationfontsize = 48.0;
+        resultfontsize = 38.0;
+        equation = equation.substring(0,equation.length - 1);
+        if(equation == ""){
+          equation = "0";
+        }
+      }
+      else if(buttontext == "="){
+         equationfontsize = 38.0;
+         resultfontsize = 48.0;
+         expression = equation;
+         expression = expression.replaceAll('x','*');
+         expression = expression.replaceAll('÷','/');
+
+         try{
+           Parser p = new Parser();
+           Expression exp = p.parse(expression);
+           ContextModel cm = ContextModel();
+           result = '${exp.evaluate(EvaluationType.REAL, cm)}';
+         }
+         catch(e){
+           result = "error";
+         }
+      }
+      else{
+        equationfontsize = 48.0;
+        resultfontsize = 38.0;
+        if(equation == "0"){
+          equation = buttontext;
+        }
+        else{
+          equation = equation + buttontext;
+        }
+      }
+    });
+  }
+
+  Widget buildButton(String buttonText,double buttonheight, Color buttoncolor){
+    return Container(
+      height: MediaQuery.of(context).size.height * buttonheight,
+      color: buttoncolor,
+      child: FlatButton(
+        shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(0.0),
+        side: BorderSide(
+          color: Colors.white,
+          width: 1,
+          style: BorderStyle.solid,
+        )
+        ),
+        padding: EdgeInsets.all(16.0),
+        onPressed: () => buttonpressed(buttonText),
+        child: Text(buttonText,
+                  style:TextStyle(
+                  fontSize:30.0,
+                  fontWeight: FontWeight.normal,
+                  color: Colors.white),
+                ),
+        ),
+        );
+  }
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Container(
-        decoration: BoxDecoration(
-          gradient: LinearGradient(
-              begin: Alignment.topRight,
-              end: Alignment.bottomLeft,
-              colors: [Colors.blue, Colors.red]
-              ),
-          ),
-       child: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children : [
-            CircleAvatar(
-                  radius: 100,
-                  backgroundColor: Colors.black,
-                  child: CircleAvatar(
-                      radius: 95,
-                      backgroundImage: AssetImage("assets/me.jpg"))),
-            SizedBox(
-              height : 15,
+      appBar: AppBar(title: Text('Calculator')),
+      body: Column(
+        children: <Widget>[
+          Container(
+            alignment: Alignment.centerRight,
+            padding: EdgeInsets.fromLTRB(10, 20, 10, 0),
+            child: Text(equation,style: TextStyle(fontSize: equationfontsize)),
             ),
-            Text("Shivani Yadav",style: TextStyle(
-              color: Colors.black,
-              fontSize: 35.0)),
-              SizedBox(
-              height : 15,
+            Container(
+            alignment: Alignment.centerRight,
+            padding: EdgeInsets.fromLTRB(10, 30, 10, 0),
+            child: Text(result,style: TextStyle(fontSize: resultfontsize)),
             ),
-              Padding(
-                padding: const EdgeInsets.only(left:50.0,right: 50.0,),
-                child: Divider(
-                  color: Colors.black,
-                  height: 5.0,
-                  thickness: 2,
-                ),
-              ),
-              Padding(
-                padding: const EdgeInsets.only(left:80.0),
-                child: Row(children: [
-                  IconButton(
-                    icon: FaIcon(FontAwesomeIcons.facebook), 
-                    onPressed: ()async {
-                    const url = "https://www.facebook.com/shivani.yadav.405098/";
-                    if (await canLaunch(url)) {
-                         await launch(url);
-                    } else {
-                         throw 'Could not launch $url';
-                    }
-                    }),
-                    IconButton(
-                    icon: FaIcon(FontAwesomeIcons.instagram), 
-                    onPressed: ()async {
-                    const url = "https://www.instagram.com/shivani4050/";
-                    if (await canLaunch(url)) {
-                         await launch(url);
-                    } else {
-                         throw 'Could not launch $url';
-                    }}),
-                    IconButton(
-                    icon: FaIcon(FontAwesomeIcons.linkedin), 
-                    onPressed:  ()async {
-                    const url = "linkedin.com/in/shivani-yadav-ba4849192";
-                    if (await canLaunch(url)) {
-                         await launch(url);
-                    } else {
-                         throw 'Could not launch $url';
-                    }}),
-                    IconButton(
-                    icon: FaIcon(FontAwesomeIcons.github), 
-                    onPressed:  ()async {
-                    const url = "github.com/shivani2204";
-                    if (await canLaunch(url)) {
-                         await launch(url);
-                    } else {
-                         throw 'Could not launch $url';
-                    }}),
-                    IconButton(
-                    icon: FaIcon(FontAwesomeIcons.kaggle), 
-                    onPressed:  ()async {
-                    const url = "kaggle.com/shivani2204";
-                    if (await canLaunch(url)) {
-                         await launch(url);
-                    } else {
-                         throw 'Could not launch $url';
-                    }}),
 
-                ],),
-              ),
-          ]
-        ),
-       ),
+            Expanded(child: Divider(),
+            ),
+
+            Row(
+              mainAxisAlignment: MainAxisAlignment.start,
+              children: <Widget>[
+                Container(
+                  width: MediaQuery.of(context).size.width * .75,
+                  child: Table(
+                    children: [
+                      TableRow(
+                        children:[
+                          buildButton("C",0.1,Colors.green),
+                          buildButton("⌫",0.1,Colors.purple),
+                          buildButton("÷",0.1,Colors.purple),
+                        ]  ),
+
+                      TableRow(
+                        children:[
+                          buildButton("7",0.1,Colors.black54),
+                          buildButton("8",0.1,Colors.black54),
+                          buildButton("9",0.1,Colors.black54),
+                        ]  ),
+
+                      TableRow(
+                        children:[
+                          buildButton("4",0.1,Colors.black54),
+                          buildButton("5",0.1,Colors.black54),
+                          buildButton("6",0.1,Colors.black54),
+                        ]  ), 
+
+                      TableRow(
+                        children:[
+                          buildButton("1",0.1,Colors.black54),
+                          buildButton("2",0.1,Colors.black54),
+                          buildButton("3",0.1,Colors.black54),
+                        ]  ), 
+
+                      TableRow(
+                        children:[
+                          buildButton(".",0.1,Colors.black54),
+                          buildButton("0",0.1,Colors.black54),
+                          buildButton("00",0.1,Colors.black54),
+                        ]  )     
+                    ]
+                  ),
+                ),
+
+                Container(
+                  width: MediaQuery.of(context).size.width * 0.25,
+                  child: Table(
+                    children: [
+                      TableRow(children: [
+                        buildButton("x",0.1,Colors.purple),
+                      ]),
+                      TableRow(children: [
+                        buildButton("-",0.1,Colors.purple),
+                      ]),
+                      TableRow(children: [
+                        buildButton("+",0.1,Colors.purple),
+                      ]),
+                      TableRow(children: [
+                        buildButton("=",0.2,Colors.green),
+                      ]),
+
+                    ]
+                  ),
+                )
+              ],
+            )
+        ]
       ),
     );
   }
 }
-
